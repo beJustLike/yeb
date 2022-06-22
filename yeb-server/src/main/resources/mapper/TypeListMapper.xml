@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxxx.server.mapper.TypeListMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xxxx.server.pojo.TypeList">
+        <id column="type_id" property="typeId"/>
+        <result column="type_color" property="typeColor"/>
+        <result column="type_model" property="typeModel"/>
+        <result column="type_name" property="typeName"/>
+        <result column="sort_value" property="sortValue"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        type_id
+        , type_color, type_model, type_name, sort_value
+    </sql>
+
+
+    <select id="findByTypeModel" resultType="com.xxxx.server.pojo.TypeList">
+        select type_id    as typeId,
+               type_color as typeColor,
+               type_model as typeModel,
+               type_name  as typeName,
+               sort_value as sortValue
+        from t_type_list
+        where type_model = #{typeModel}
+    </select>
+
+    <select id="findByTypeId" resultType="com.xxxx.server.pojo.TypeList">
+        select type_id    as typeId,
+               type_color as typeColor,
+               type_model as typeModel,
+               type_name  as typeName,
+               sort_value as sortValue
+        from t_type_list
+        where type_id = #{typeId}
+    </select>
+
+
+</mapper>

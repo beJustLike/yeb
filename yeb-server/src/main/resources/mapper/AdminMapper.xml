@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxxx.server.mapper.AdminMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xxxx.server.pojo.Admin">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="telephone" property="telephone"/>
+        <result column="address" property="address"/>
+        <result column="enabled" property="enabled"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="userFace" property="userFace"/>
+        <result column="salaryId" property="salaryId"/>
+        <result column="departmentId" property="departmentId"/>
+        <result column="departmentName" property="departmentName"/>
+        <result column="remark" property="remark"/>
+        <result column="parentId" property="parentId"/>
+        <result column="posId" property="posId"/>
+        <result column="posName" property="posName"/>
+        <result column="parentName" property="parentName"/>
+        <result column="email" property="email"/>
+        <result column="salaryName" property="salaryName"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id
+        , name, phone, telephone, address, enabled,username, password, userFace, remark,parentId,posId,departmentName,posName
+    </sql>
+
+    <insert id="addUser" keyProperty="id" useGeneratedKeys="true">
+        insert into t_admin (id, name, phone, address, enabled, username, password, remark, parentId, posId, email,
+                             departmentId, salaryId, departmentName, posName, userFace)
+        values (#{admin.id}, #{admin.name}, #{admin.phone}, #{admin.address}, 1, #{admin.username},
+                #{admin.password}, #{admin.remark}, #{admin.parentId}, #{admin.posId}, #{admin.email},
+                #{admin.departmentId}, #{admin.salaryId}, #{admin.departmentName}, #{admin.posName},
+                'http://47.97.120.165:80/group1/M00/00/00/L2F4pWJTgcCADgZSAAFMTSIyYbw026.png')
+    </insert>
+
+    <resultMap id="AdminWithRole" type="com.xxxx.server.pojo.Admin" extends="BaseResultMap">
+        <collection property="roles" ofType="com.xxxx.server.pojo.Role">
+            <id column="rid" property="id"/>
+            <result column="rname" property="name"/>
+            <result column="rnameZh" property="nameZh"/>
+        </collection>
+    </resultMap>
+
+    <!-- 获取所有操作员 -->
+    <select id="getAllAdmins" resultMap="AdminWithRole">
+        select distinct
+        a.*,
+        r.id as rid,
+        r.name as rname,
+        r.nameZh as rnameZh,
+        td.name as departmentName,
+        ta.name as parentName,
+        ts.name as salaryName
+        from
+        t_admin a
+        left join t_admin_role ar on a.id = ar.adminId
+        left join t_role r on r.id = ar.rid
+        left join t_department td on a.departmentId = td.id
+        left join t_admin ta on td.depManager = ta.id
+        left join t_salary ts on a.salaryId = ts.id
+        where
+        a.id != #{id}
+        <if test=" null != keywords and '' != keywords ">
+            and a.name like concat('%', #{keywords}, '%')
+        </if>
+        order by a.id
+    </select>
+    <select id="findByUserName" resultType="com.xxxx.server.pojo.Admin">
+        select a.*
+        from t_admin a
+        where name = #{nameUser}
+    </select>
+    <select id="findParentIdByUserId" resultType="java.lang.Long">
+        select parentId
+        from t_admin
+        where id = #{userId}
+    </select>
+    <select id="findIdByShenUser" resultType="java.lang.Long">
+        select id
+        from t_admin
+        where name = #{shenUser}
+    </select>
+    <select id="getshenNameById" resultType="java.lang.String">
+        select name
+        from t_admin
+        where id = #{userId}
+    </select>
+    <select id="selectUserById" resultType="com.xxxx.server.pojo.Admin">
+        select a.*
+        from t_admin a
+        where id = #{userId}
+    </select>
+    <select id="getEmpByPage" resultMap="AdminWithRole">
+        select
+        ta.*,
+        tp.name as posName,
+        ta2.name as parentName
+        from
+        t_admin ta
+        left join t_position tp on tp.id = ta.posId
+        left join t_admin ta2 on ta .parentId = ta2.id
+        <where>
+            <if test="name != null and name != ''">
+                ta.name like concat('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+    <select id="getAdminById" resultMap="AdminWithRole">
+        select *
+        from t_admin
+        where id = #{id}
+    </select>
+
+    <resultMap id="AdminWithSalary" type="com.xxxx.server.pojo.Admin" extends="BaseResultMap">
+        <association property="salary" javaType="com.xxxx.server.pojo.Salary">
+            <id column="sid" property="id"/>
+            <result column="sname" property="name"/>
+            <result column="sbasicSalary" property="basicSalary"/>
+            <result column="sbonus" property="bonus"/>
+            <result column="slunchSalary" property="lunchSalary"/>
+            <result column="strafficSalary" property="trafficSalary"/>
+            <result column="sallSalary" property="allSalary"/>
+            <result column="pensionBase" property="pensionBase"/>
+            <result column="pensionPer" property="pensionPer"/>
+            <result column="smedicalBase" property="medicalBase"/>
+            <result column="smedicalPer" property="medicalPer"/>
+            <result column="saccumulationFundBase" property="accumulationFundBase"/>
+            <result column="saccumulationFundPer" property="accumulationFundPer"/>
+        </association>
+        <association property="department" javaType="com.xxxx.server.pojo.Department">
+            <result column="dname" property="name"/>
+        </association>
+        <collection property="roles" ofType="com.xxxx.server.pojo.Role">
+            <id column="rid" property="id"/>
+            <result column="rname" property="name"/>
+            <result column="rnameZh" property="nameZh"/>
+        </collection>
+    </resultMap>
+
+    <select id="getAdminWithSalary" resultMap="AdminWithSalary">
+        select e.*,
+               d.name                 as dname,
+               s.id                   as sid,
+               s.name                 as sname,
+               s.basicSalary          as sbasicSalary,
+               s.bonus                as sbonus,
+               s.lunchSalary          as slunchSalary,
+               s.trafficSalary        as strafficSalary,
+               s.allSalary            as sallSalary,
+               s.pensionBase          as pensionBase,
+               s.pensionPer           as pensionPer,
+               s.medicalBase          as smedicalBase,
+               s.medicalPer           as smedicalPer,
+               s.accumulationFundBase as saccumulationFundBase,
+               s.accumulationFundPer  as saccumulationFundPer
+        from t_admin e
+                 left join t_salary s on e.salaryId = s.id
+                 left join t_department d on d.id = e.departmentId
+        order by e.id
+    </select>
+
+</mapper>

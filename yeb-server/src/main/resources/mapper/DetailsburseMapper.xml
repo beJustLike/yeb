@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxxx.server.mapper.DetailsburseMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xxxx.server.pojo.DetailsBurse">
+        <id column="detailsburse_id" property="detailsburseId"/>
+        <result column="descript" property="descript"/>
+        <result column="detailmoney" property="detailmoney"/>
+        <result column="invoices" property="invoices"/>
+        <result column="produce_time" property="produceTime"/>
+        <result column="subject" property="subject"/>
+        <result column="bursment_id" property="bursmentId"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        detailsburse_id
+        , descript, detailmoney, invoices, produce_time, subject, bursment_id
+    </sql>
+    <insert id="save" parameterType="com.xxxx.server.pojo.DetailsBurse">
+        insert into t_detailsburse (descript, detailmoney, invoices, produce_time, subject, bursment_id)
+        values (#{entity.descript}, #{entity.detailmoney}, #{entity.invoices}, #{entity.produceTime}, #{entity.subject},
+                #{entity.bursmentId})
+    </insert>
+    <select id="getDetailsburse" resultType="com.xxxx.server.pojo.DetailsBurse">
+        select detailsburse_id as detailsburseId,
+               descript,
+               detailmoney,
+               invoices,
+               produce_time    as produceTime,
+               subject,
+               bursment_id     as bursmentId
+        from t_detailsburse
+        where bursment_id = #{bursementId}
+    </select>
+
+</mapper>
+

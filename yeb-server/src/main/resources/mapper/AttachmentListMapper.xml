@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxxx.server.mapper.AttachmentListMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xxxx.server.pojo.AttachmentList">
+        <id column="attachment_id" property="attachmentId" />
+        <result column="attachment_name" property="attachmentName" />
+        <result column="attachment_path" property="attachmentPath" />
+        <result column="attachment_shuffix" property="attachmentShuffix" />
+        <result column="attachment_size" property="attachmentSize" />
+        <result column="attachment_type" property="attachmentType" />
+        <result column="model" property="model" />
+        <result column="upload_time" property="uploadTime" />
+        <result column="user_id" property="userId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        attachment_id, attachment_name, attachment_path, attachment_shuffix, attachment_size, attachment_type, model, upload_time, user_id
+    </sql>
+
+</mapper>
