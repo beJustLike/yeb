@@ -14,22 +14,23 @@ import java.util.regex.Pattern;
 
 import com.googlecode.ipv6.IPv6Network;
 import com.sun.deploy.util.StringUtils;
+import org.apache.commons.math3.analysis.function.Pow;
 
 /**
  * @Author liyongkang
  * @Date 2022/8/8
- *
+ * <p>
  * IPv6的工具类:
  * 1. 判断是否是IPv6类型
  * 2. 将给定的IPv6字符串转化为二进制
  * 3. 将给定的IPv6字符串转换为十六进制
  * 4. 补全带"::"的IPv6
- *
  **/
 public class IPv6Util {
 
     /**
      * 给定16进制数据，转换为10进制数据
+     *
      * @param ipv6
      * @return
      */
@@ -41,7 +42,7 @@ public class IPv6Util {
         if (ipv6.startsWith(":"))// 去掉开头的冒号
             ipv6 = ipv6.substring(1);
         if (ipv6.endsWith("::")) {
-            ipv6 = ipv6+"0";
+            ipv6 = ipv6 + "0";
         }
         String groups[] = ipv6.split(":");
         for (int ig = groups.length - 1; ig > -1; ig--) {// 反向扫描
@@ -72,7 +73,6 @@ public class IPv6Util {
 
     /**
      * 将ipv6每段补齐4位，如果返回-1说明给定的ipv6不合法
-     *
      */
     public static String completIpv6(String ipv6) throws UnknownHostException {
         StringBuffer str = new StringBuffer();
@@ -99,7 +99,7 @@ public class IPv6Util {
                     str.append(info[i]);
                 }
             }
-        }else {
+        } else {
             return "-1";
         }
         return str.toString();
@@ -115,39 +115,39 @@ public class IPv6Util {
 
     public static String shortedIpv6(String ipv6) {
         if (isValidIpv6Addr(ipv6)) {
-            String shortIP="";
+            String shortIP = "";
             String[] arr = ipv6.split(":");
             //去掉每组数据前的0
-            for (int i = 0; i < arr.length; i++){
+            for (int i = 0; i < arr.length; i++) {
                 arr[i] = arr[i].replaceAll("^0{1,3}", "");
             }
             //最长的连续0
             String[] arr2 = arr.clone();
-            for (int i = 0; i < arr2.length; i++){
-                if (!"0".equals(arr2[i])){
+            for (int i = 0; i < arr2.length; i++) {
+                if (!"0".equals(arr2[i])) {
                     arr2[i] = "-";
                 }
             }
             Pattern pattern = Pattern.compile("0{2,}");
             Matcher matcher = pattern.matcher(StringUtils.join(Arrays.asList(arr2), ""));
-            String maxStr= "";
+            String maxStr = "";
             int start = -1;
             int end = -1;
             while (matcher.find()) {
-                if(maxStr.length()<matcher.group().length()) {
-                    maxStr=matcher.group();
+                if (maxStr.length() < matcher.group().length()) {
+                    maxStr = matcher.group();
                     start = matcher.start();
                     end = matcher.end();
                 }
             }
             // 组合IPv6简写地址
-            if(maxStr.length()>0) {
-                for (int i = start; i < end; i++){
+            if (maxStr.length() > 0) {
+                for (int i = start; i < end; i++) {
                     arr[i] = ":";
                 }
             }
             shortIP = StringUtils.join(Arrays.asList(arr), ":");
-            shortIP= shortIP.replaceAll(":{2,}", "::");
+            shortIP = shortIP.replaceAll(":{2,}", "::");
             return shortIP;
         }
         return "-1";
@@ -155,6 +155,7 @@ public class IPv6Util {
 
     /**
      * 将整数形式的ipv6地址转换为字符串形式
+     *
      * @param big 10进制的ipv6地址
      * @return
      */
@@ -174,6 +175,7 @@ public class IPv6Util {
 
     /**
      * 将ipv6地址转换为二进制分段（为了创造ip段写的），如果返回-1说明给定的ipv6不合法
+     *
      * @param ipv6
      * @return
      * @throws UnknownHostException
@@ -189,13 +191,14 @@ public class IPv6Util {
                     tmpString += str + ":";
                 }
             }
-            return tmpString.substring(0,tmpString.lastIndexOf(":"));
+            return tmpString.substring(0, tmpString.lastIndexOf(":"));
         }
         return "-1";
     }
 
     /**
      * 将ipv4地址转换为二进制分段（为了创造ip段写的)
+     *
      * @param ipv4
      * @return
      * @throws UnknownHostException
@@ -214,6 +217,7 @@ public class IPv6Util {
 
     /**
      * 校验某ipv4，是否在网段掩码中
+     *
      * @param ipv4 例：172.16.0.4
      * @param cidr 例: 172.16.0.0/32
      * @return
@@ -234,7 +238,8 @@ public class IPv6Util {
 
     /**
      * 校验某ipv6，是否在网段掩码中
-     * @param ipv6 例：2444:4411:1000::0eff:1
+     *
+     * @param ipv6     例：2444:4411:1000::0eff:1
      * @param ipv6area 例: 2444:4411:1000::1/100
      * @return
      * @throws Exception
@@ -248,7 +253,6 @@ public class IPv6Util {
         }
         BigInteger ipv6Big = ipv6ToBytesToBigInteger(ipv6);
         BigInteger ipv6areaBig = ipv6ToBytesToBigInteger(ipv6area);
-
         BigDecimal ss = new BigDecimal(2);
         BigDecimal pow = ss.pow(128);
         BigInteger aa = new BigInteger(pow.toString());
@@ -262,6 +266,31 @@ public class IPv6Util {
 
         return ipv6Big.and(mask).compareTo(ipv6areaBig.and(mask)) == 0 ? true : false;
     }
+
+    /**
+     * 根据子网前缀计算两个ipv6地址是否在同一子网内
+     * 两个ipv6转为BigInteger后做减法，如果结果大于等于0并且小于16的（128-子网前缀长度）次幂则正确
+     * @param ipv6
+     * @param ipv6Area
+     * @return
+     */
+    public static boolean isRange(String ipv6, String ipv6Area) {
+
+        String suffix = ipv6Area.substring(ipv6Area.indexOf("/") + 1);
+
+        ipv6Area = ipv6Area.substring(0, ipv6Area.indexOf("/"));
+
+        BigInteger ipv6Big = ipv6ToBytesToBigInteger(ipv6);
+        BigInteger ipv6areaBig = ipv6ToBytesToBigInteger(ipv6Area);
+
+        BigInteger ss = new BigInteger("16");
+        BigInteger pow = ss.pow(128 - Integer.valueOf(suffix));
+
+        BigInteger number = ipv6areaBig.subtract(ipv6Big).abs();
+
+        return number.compareTo(new BigInteger("0")) == 1 && number.compareTo(pow) == -1;
+    }
+
 
     /**
      * 判断IPv6是否属于某个IPv6段
@@ -289,6 +318,7 @@ public class IPv6Util {
 
     /**
      * 给定ipv6及前缀标识，获取起止ipv6十进制数
+     *
      * @param iparea 例：2444:4411:1000::1/100
      * @return
      */
@@ -312,20 +342,20 @@ public class IPv6Util {
             BigInteger big = BigInteger.ZERO;
             StringBuffer mask = new StringBuffer();
             for (int i = 0; i < 128; i++) {
-                if (i<count) {
+                if (i < count) {
                     mask.append("1");
-                }else {
+                } else {
                     mask.append("0");
                 }
             }
-            String string = new BigInteger(mask.toString(),2).toString(10);
-			for (int i = 0; i < 128 - count; i++) {
-				double pow = Math.pow(2d, Double.valueOf(Integer.valueOf(i).toString()));
-				BigInteger tmp = BigDecimal.valueOf(pow).toBigInteger();
-				small = small.add(tmp);
-			}
-			big = BigDecimal.valueOf(Math.pow(2d, Double.valueOf("128"))).toBigInteger().subtract(small)
-					.subtract(BigInteger.valueOf(1));
+            String string = new BigInteger(mask.toString(), 2).toString(10);
+            for (int i = 0; i < 128 - count; i++) {
+                double pow = Math.pow(2d, Double.valueOf(Integer.valueOf(i).toString()));
+                BigInteger tmp = BigDecimal.valueOf(pow).toBigInteger();
+                small = small.add(tmp);
+            }
+            big = BigDecimal.valueOf(Math.pow(2d, Double.valueOf("128"))).toBigInteger().subtract(small)
+                    .subtract(BigInteger.valueOf(1));
 
             BigInteger areaIp = ipv6ToBytesToBigInteger(ipinfo);
 
@@ -333,8 +363,8 @@ public class IPv6Util {
             info[1] = areaIp.or(small);
 
             info[0] = areaIp.and(new BigInteger(string));
-            String re = mask.substring(mask.lastIndexOf("1")+1).replace("0", "1");
-            info[1] = areaIp.or(new BigInteger(new BigInteger(re.toString(),2).toString(10)).subtract(BigInteger.valueOf(1)));
+            String re = mask.substring(mask.lastIndexOf("1") + 1).replace("0", "1");
+            info[1] = areaIp.or(new BigInteger(new BigInteger(re.toString(), 2).toString(10)).subtract(BigInteger.valueOf(1)));
             if (info[0] == null || info[1] == null) {
                 return null;
             }
@@ -345,28 +375,28 @@ public class IPv6Util {
     }
 
 
-
     /**
      * 根据开始ip，数量返回需要规划的所有ipv6
+     *
      * @param ipv6Start ipv6开始ip
-     * @param count 添加的数量
+     * @param count     添加的数量
      * @return
      * @throws UnknownHostException
      */
-    public static List<String> getIpv6List(String ipv6Start , BigInteger count) throws UnknownHostException {
+    public static List<String> getIpv6List(String ipv6Start, BigInteger count) throws UnknownHostException {
         List<String> list = new ArrayList<>();
-        if(isValidIpv6Addr(ipv6Start)) {
+        if (isValidIpv6Addr(ipv6Start)) {
             String ipv6 = completIpv6(ipv6Start);
             BigInteger ipv6IntegerStart = ipv6ToBytesToBigInteger(ipv6);
             BigInteger cou = count.subtract(new BigInteger(String.valueOf(1)));
             BigInteger ipv6IntegerEnd = ipv6IntegerStart.add(cou);
 
-            while(true){
+            while (true) {
                 String ip = int10Toipv6(ipv6IntegerStart);
                 list.add(ip);
                 //+1操作
                 ipv6IntegerStart = ipv6IntegerStart.add(BigInteger.ONE);
-                if(ipv6IntegerStart.compareTo(ipv6IntegerEnd)==1) {
+                if (ipv6IntegerStart.compareTo(ipv6IntegerEnd) == 1) {
                     break;
                 }
             }
@@ -402,6 +432,7 @@ public class IPv6Util {
 
     /**
      * 给定前缀标识，返回ipv6开始ip
+     *
      * @param ipAddr 例如：15ba:db5:5::/64
      * @return
      */
@@ -410,8 +441,10 @@ public class IPv6Util {
         String start = network.getFirst().toLongString();
         return start;
     }
+
     /**
      * 给定前缀标识，返回ipv6结束ip
+     *
      * @param ipAddr 例如：15ba:db5:5::/64
      * @return
      */
@@ -420,7 +453,6 @@ public class IPv6Util {
         String end = network.getLast().toLongString();
         return end;
     }
-
 
 
     /**
@@ -459,11 +491,11 @@ public class IPv6Util {
         return pairs;
     }
 
-    public static final int[] CIDR2MASK = new int[] { 0x00000000, 0x80000000, 0xC0000000, 0xE0000000, 0xF0000000,
+    public static final int[] CIDR2MASK = new int[]{0x00000000, 0x80000000, 0xC0000000, 0xE0000000, 0xF0000000,
             0xF8000000, 0xFC000000, 0xFE000000, 0xFF000000, 0xFF800000, 0xFFC00000, 0xFFE00000, 0xFFF00000, 0xFFF80000,
             0xFFFC0000, 0xFFFE0000, 0xFFFF0000, 0xFFFF8000, 0xFFFFC000, 0xFFFFE000, 0xFFFFF000, 0xFFFFF800, 0xFFFFFC00,
             0xFFFFFE00, 0xFFFFFF00, 0xFFFFFF80, 0xFFFFFFC0, 0xFFFFFFE0, 0xFFFFFFF0, 0xFFFFFFF8, 0xFFFFFFFC, 0xFFFFFFFE,
-            0xFFFFFFFF };
+            0xFFFFFFFF};
 
     private static long ipToLong(String strIP) {
         long[] ip = new long[4];
